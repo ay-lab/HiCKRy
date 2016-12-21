@@ -31,9 +31,14 @@ def smoothedContactCounts(Alpha, Steps, picklePath, R, graphPath=None, matrixFil
                 from plot import plotMatrix
                 plotMatrix(walk, graphPath, name)
             fname = os.path.join(picklePath, name)
+
+
+
             if outputSmoothedMatrixFile:
-                from spsIO import outputMatrixFile
-                outputMatrixFile(walk, name, matrixFilePath)
+                from spsIO import outputBedMatrix 
+                outputBedMatrix(walk, name, matrixFilePath)
+            
+            
             with open(fname, 'wb') as f:
                 pickle.dump(walk, f)
             f.close()

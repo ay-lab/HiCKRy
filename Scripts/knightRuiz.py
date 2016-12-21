@@ -131,23 +131,22 @@ def knightRuizAlg(A, tol=1e-6, f1 = False):
     return [x,i,k]
 
 def main():
-    #test = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-    #print test
-
-    test = sps.rand(5,5, 0.7)
+    test = sps.rand(5,5,density=0.5,format='csr')
     print test.toarray()
-
+    CC = ((test.sum())/(test.shape[0]*2))
+    CCother = test.sum()/test.size 
     result = knightRuizAlg(test)
     col = result[0]
-    print result[1]
-    print result[2]
-
     x = sps.diags(col.flatten(), 0, format='csr')
     mtx = x.dot(test.dot(x))
-    print type(mtx)
-    print mtx.toarray()
 
-    print sps.csr_matrix.sum(mtx)
+
+    print mtx.toarray()
+    CCmtx = CC * mtx
+    CCothermtx = CCother * mtx
+    print CCmtx.toarray()
+    print()
+    print CCothermtx.toarray()
 
 
 if __name__=="__main__":

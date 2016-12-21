@@ -3,7 +3,7 @@ import numpy as np
 import scipy.sparse as sps
 from knightRuiz import knightRuizAlg
 
-def stchMatrix(picklePath, percentOfSparseToRemove, graphPath=None, biasValues=False, matrixFilePath=None, outputNormalizedMatrixFile=False):
+def stchMatrix(picklePath, percentOfSparseToRemove, graphPath=None, biasValues=False, matrixFilePath=None, outputNormalizedMatrixFile=False, fithicOutputType=False, bedOutputType=False):
     import cPickle as pickle
 
 
@@ -12,12 +12,13 @@ def stchMatrix(picklePath, percentOfSparseToRemove, graphPath=None, biasValues=F
         rawMatrix = pickle.load(f)
     f.close()
 
+    R = rawMatrix.sum()
+
     mtxAndRemoved = removeZeroDiagonalCSR(rawMatrix, percentOfSparseToRemove)
     initialSize = rawMatrix.shape[0]
     rawMatrix = mtxAndRemoved[0]
     removed = mtxAndRemoved[1]
     newSize = rawMatrix.shape[0]
-    print "Difference is %s" % (initialSize - newSize)
 
 
     print "Generating Normalized Matrix"
@@ -40,20 +41,30 @@ def stchMatrix(picklePath, percentOfSparseToRemove, graphPath=None, biasValues=F
     del(colVec)
 
     normalizedMatrix = x.dot(rawMatrix.dot(x))
+    n = normalizedMatrix.shape[0]
     print "Normalized Matrix Generated"
     
     #calculate normalization difference
     difference = abs(rawMatrix.shape[0] - sps.csr_matrix.sum(normalizedMatrix))
 
+    scalar = R/n
+
     if graphPath is not None:
         from plot import plotMatrix
         print "Generating heatmap for Normalized Matrix"
-        plotMatrix(normalizedMatrix, graphPath, "Normalized.Mtx")
+        plotMatrix((normalizedMatrix*scalar), graphPath, "Normalized.Mtx")
+
+
 
     if outputNormalizedMatrixFile:
         from spsIO import outputMatrixFile
         print "Outputting Normalized Matrix"
-        outputMatrixFile(normalizedMatrix, "Normalized.Mtx", matrixFilePath)
+#        if fithicOutputType:
+#            from spsIO import outputNobleMatrix 
+#            outputNobleMatrix(normalizedMatrix, "Normalized.mtx", matrixFilePath)
+        if bedOutputType or fithicOutputType:
+            from spsIO import outputBedMatrix
+            outputBedMatrix((normalizedMatrix*scalar), "Normalized.matrix", matrixFilePath)
 
     fileName = os.path.join(picklePath, "Normalized.Mtx")
     with open(fileName, 'wb') as f:

@@ -4,7 +4,7 @@ import numpy as np
 import time
 import cPickle as pickle
 import scipy.io as sio
-
+import csv
 
 
 def loadBed(bedPath, matrixPath, picklePath, graphPath=None):
@@ -54,6 +54,31 @@ def loadBed(bedPath, matrixPath, picklePath, graphPath=None):
 
     print "Pickled!"
     return R
+
+
+def outputBedMatrix(matrix, filename, matrixFilePath):
+    saveLocation = os.path.join(matrixFilePath, filename)
+    with open(saveLocation, 'w') as matrixFile:
+        values = matrix.data
+        colIndex = matrix.indices
+        rowPtrs = matrix.indptr
+        for n in range(matrix.shape[0]):
+            matrixFile.write(("%s\t%s\t%.4f\n") % ((rowPtrs[n]+1), (colIndex[n]+1), (values[n])))
+
+
+def outputNobleMatrixForNoble(matrix, filename, matrixFilePath):
+    saveLocation = os.path.join(matrixFilePath, filename)
+    with open(saveLocation, 'w') as matrixFile:
+        values = matrix.data
+        colIndex = matrix.indices
+        rowPtrs = matrix.indptr
+
+def outputNobleMatrixForBed(matrix, filename, matrixFilePath,bedFilePath):
+    saveLocation = os.path.join(matrixFilePath, filename)
+    with open(saveLocation, 'w') as matrixFile:
+        values = matrix.data
+        colIndex = matrix.indices
+        rowPtrs = matrix.indptr
 
 
 #loadNoble converts a raw data file into a sparse matrix to be computed
@@ -118,8 +143,6 @@ def loadNoble(chrNum, resolution, noblePath, picklePath, lenDic, fragDic, graphP
     dirty_mtx = dirty_mtx.tocsr()
     R = sps.csr_matrix.sum(dirty_mtx)
 
-    print dirty_mtx.shape
-    
     #done loading!
     endTime = time.time()
     print("Loading took %f" % (endTime - startTime))
@@ -192,7 +215,7 @@ def outputBiasFileNobleForBed(picklePath, outputFilePath, bedFilePath):
     
         with open(bedFilePath, 'r') as bedFile:
             lines = bedFile.readlines()
-            print lines
+            #print lines
             ctr = 0
             for values in np.nditer(biasCol):        
                 fileLine = lines[ctr].rstrip().split() 

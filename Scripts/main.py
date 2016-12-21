@@ -36,7 +36,7 @@ parser.add_argument('-c', '--chrNum', help='Chromosome number to read in followi
 parser.add_argument('-b','--bias', help='Should we calculate the bias values?', action='store_true')
 parser.add_argument('-tr', '--toRemove', help='Percent of sparse row/columns to remove from matrix', type = int)
 parser.add_argument('-g','--graphs', help='Turn on output graphs', action='store_true')
-parser.add_argument('-o', '--outputMM', help='Output doubly stochastic matrix only.', action = 'store_true')
+parser.add_argument('-o', '--outputDS', help='Output doubly stochastic matrix only.', action = 'store_true')
 
 def alphaStep(s):
     try:
@@ -49,10 +49,11 @@ def alphaStep(s):
 parser.add_argument('-as','--alphaStep', help="Describe range of alpha and step through two arguments. The first will be alpha and the next will be step. Each are ints denoting 'start, stop, number of evenly spaced numbers within range'", nargs=2, type=alphaStep)
 parser.add_argument('-osm', '--outputSmoothedMatrix', help="Option to output a smoothed matrix per the specified range of the alphaStep option.", action='store_true')
 parser.add_argument('-f', '--outputFormat', help="Describe how you would like the output files (biasvalues and/or doubly stochastic matrix) to be formatted. If 'fithic' the typical fithic format will be followed, 'bed' yields a .matrix file format similar to bed/matrix files")
-
-
-
 args = parser.parse_args()
+
+
+
+
 
 ### PARSE FILE TYPE ###
 
@@ -71,9 +72,10 @@ if args.type == 'fithic':
     nobleFileType = True
     if len(args.filePath) is not 1:
         print "Only the path to the noble file is required"
+        print args.filePath
         sys.exit(2)
     if args.resolution is None:
-        print "Default resolution is 40000, if this is not the resolution of the data retry with --resolution option" 
+        print "Default resolution is 40000, if this is not the resolution of the data. Retry with --resolution option" 
         resolution = 40000
     if args.chrLens is None:
         print "Need chrLens to match against for Noble file type. Retry with --chrLens option"
@@ -87,7 +89,6 @@ if bedFileType:
 
     bedPath = args.filePath[0]
     matrixPath = args.filePath[1]
-
 
 if nobleFileType:
     if not os.path.exists(args.filePath[0]):
@@ -168,7 +169,7 @@ if args.graphs:
 
 ### PARSE OUTPUT DOUBLY STOCHASTIC MATRIX FILE OPTION ###
 outputNormalizedMatrixFile = False
-if args.outputMM:
+if args.outputDS:
     outputNormalizedMatrixFile = True
 
 
@@ -195,7 +196,7 @@ if args.outputFormat:
     elif args.outputFormat == "bedOutputFormat":
         bedOutputFormat = True
     if outputNormalizedMatrixFile is False and biasValues is False:
-        print "Nothing to output. -f option is being misused. Either remove it or use --outputMM or -bias option."
+        print "Nothing to output. -f option is being misused. Either remove it or use --outputDS or -bias option."
         sys.exit(2)
 
 if nobleFileType:
@@ -277,7 +278,7 @@ def main():
     if nobleFileType:
         R = loadNoble(chrNum, resolution, noblePath, picklePath, lenDic, allFragsDic, graphPath)
 
-    stchMatrix(picklePath, percentOfSparseToRemove, graphPath, biasValues, matrixFilePath, outputNormalizedMatrixFile)
+    stchMatrix(picklePath, percentOfSparseToRemove, graphPath, biasValues, matrixFilePath, outputNormalizedMatrixFile, fithicOutputFormat, bedOutputFormat)
    
     if biasValues:
         if fithicOutputFormat and bedFileType:
